@@ -27,7 +27,6 @@ const CHEAT_CONFIG = [
 ];
 const CHEAT_CONFIG_MAP = new Map(CHEAT_CONFIG);
 const cheatValues = new Map(CHEAT_CONFIG.map(([cheat, {defaultValue}]) => {
-	window[cheat] = defaultValue; // For non CCLoader implementations.
 	return [cheat, defaultValue];
 }));
 // Adaptors for getters and setters to ensure we can swap out the underlying structures easily.
@@ -41,10 +40,8 @@ function getCheatsObject() {
 	}, Object.create(null));
 }
 function setCheatValue(cheat, value) {
-	window[cheat] = value; // For non CCLoader implementations.
 	return cheatValues.set(cheat, value);
 }
-ig.baked = !0;
 ig.module("cheats").requires("game.feature.player.player-level", "game.feature.player.player-model", "game.feature.arena.arena", "game.feature.arena.arena-bonus-objectives", "game.feature.player.entities.player", "game.feature.combat.model.combat-params", "game.feature.trade.trade-model", "game.feature.combat.model.enemy-type", "game.feature.model.game-model", "game.feature.combat.entities.enemy", "game.feature.puzzle.entities.item-destruct", "game.feature.new-game.new-game-model").defines(function () {
 	// START: Utilities
 	function replaceProp(obj, prop, replaceFunc) {
@@ -246,56 +243,7 @@ ig.module("cheats").requires("game.feature.player.player-level", "game.feature.p
 });
 ig.baked = !0;
 ig.module("cheats-gui").requires("game.feature.gui.screen.title-screen", "game.feature.gui.screen.pause-screen", "game.feature.menu.gui.base-menu", "game.feature.menu.menu-model", "impact.base.lang", "impact.feature.gui.gui", "game.feature.interact.button-group", "game.feature.menu.gui.menu-misc", "game.feature.menu.gui.options.options-misc", "game.feature.gui.base.text", "game.feature.gui.base.button", "impact.feature.interact.press-repeater", "game.feature.gui.base.numbers", "game.feature.font.font-system").defines(function () {
-	// START: Lang Extension
-	// If this code is changed into a real mod/extension this can be moved into a separate lang JSON.
-	const LANG_EXTENSION = {
-		"sc": {
-			"cheats": {
-				"title": "Cheats",
-				"name": {
-					"arenaalwaysbonuses": "Arena Always Bonuses",
-					"arenaalwaysplat": "Arena Always Platinum",
-					"arenanodamagepenalty": "Arena No Damage Penalty",
-					"arenaperfectchain": "Arena Perfect Chain",
-					"cpcheat": "Do Not Remove CP",
-					"consumableinfinite": "Consumable Infinite",
-					"consumablenocooldown": "Consumable No Cooldown",
-					"creditcheat": "Credit Cheats",
-					"creditmultiplier": "Credit Multiplier",
-					"donotremovearenacoins": "Do Not Remove Arena Coins",
-					"donotremovecredit": "Do Not Remove Credit",
-					"donotremovetrophypoints": "NG+ Mods Total Cost Zero",
-					"enemydropcheat": "Enemy Drop",
-					"ignorespcheat": "Ignore SP",
-					"invincible": "Invincible",
-					"noactioncancelonhit": "No Action Cancel On Hit",
-					"noknockbackonhit": "No Knockback On Hit",
-					"overheatelim": "Overheat Elimination",
-					"plantdropcheat": "Plant Drop",
-					"tradecheat": "Do Not Remove Items On Trade",
-					"xpcheat": "XP Cheats",
-					"xpmingain": "XP Min Gain",
-					"xpmultiplier": "XP Multiplier"
-				}
-			}
-		}
-	};
-	ig.Lang.inject({
-		onload(...args) {
-			this.parent(...args);
-			function setProperties(from, to) {
-				for (const [key, value] of Object.entries(from)) {
-					if (typeof value === "object") {
-						setProperties(value, to[key] = to[key] || {});
-					} else {
-						to[key] = value;
-					}
-				}
-			}
-			setProperties(LANG_EXTENSION, this.labels);
-		},
-	});
-	// END: Lang Extension
+	ig.langFileList.push("sc.cheats");
 	function isNewGamePlus() {
 		// This is the ONLY method in the game that checks for new game plus and returns a boolean...
 		return sc.TitleScreenButtonGui.prototype.checkClearSaveFiles();
@@ -311,53 +259,35 @@ ig.module("cheats-gui").requires("game.feature.gui.screen.title-screen", "game.f
 		}
 		return map;
 	}, new Map);
-	function getConfigFilePath() {
-		let prefix = "./assets/js/";
-		if ("simplify" in window) {
-			const cheatsMod = simplify.getMod("Cheats");
-			if (cheatsMod) {
-				prefix = cheatsMod.baseDirectory;
-			}
-		}
-		return `${prefix}cheats.json`;
-	}
+	const CONFIG_FILE_PATH = `${modloader.loadedMods.get("cheats").baseDirectory}cheats.json`;
 	const fsPromises = require("fs").promises;
-	// Determine whether we're in CCLoader and if we are we wait for simplify to load.
-	new Promise((resolve) => {
-		if ("activeMods" in window) {
-			document.body.addEventListener("simplifyInitialized", resolve);
-		} else {
-			resolve();
-		}
-	}).then(() => {
-		// Load the cheat values from the file to initialize.
-		fsPromises.readFile(getConfigFilePath(), "utf-8").then((str) => {
-			const config = JSON.parse(str);
-			for (const [cheat, value] of Object.entries(config)) {
-				if (CHEAT_CONFIG_MAP.has(cheat)) {
-					const cheatData = CHEAT_CONFIG_MAP.get(cheat);
-					switch (cheatData.type) {
-						case "CHECKBOX": {
-							setCheatValue(cheat, !!value);
-							break;
+	// Load the cheat values from the file to initialize.
+	fsPromises.readFile(CONFIG_FILE_PATH, "utf-8").then((str) => {
+		const config = JSON.parse(str);
+		for (const [cheat, value] of Object.entries(config)) {
+			if (CHEAT_CONFIG_MAP.has(cheat)) {
+				const cheatData = CHEAT_CONFIG_MAP.get(cheat);
+				switch (cheatData.type) {
+					case "CHECKBOX": {
+						setCheatValue(cheat, !!value);
+						break;
+					}
+					case "SLIDER": {
+						const num = Number(value);
+						if (num !== NaN) {
+							const clamped = Math.max(cheatData.min, Math.min(cheatData.max, num));
+							setCheatValue(cheat, clamped);
 						}
-						case "SLIDER": {
-							const num = Number(value);
-							if (num !== NaN) {
-								const clamped = Math.max(cheatData.min, Math.min(cheatData.max, num));
-								setCheatValue(cheat, clamped);
-							}
-							break;
-						}
+						break;
 					}
 				}
 			}
-		}).catch((err) => {
-			// We couldn't read the file or it was malformed so we just stick to the defaults.
-		});
+		}
+	}).catch((err) => {
+		// We couldn't read the file or it was malformed so we just stick to the defaults.
 	});
 	function saveCheatsToFile() {
-		return fsPromises.writeFile(getConfigFilePath(), JSON.stringify(getCheatsObject(), null, "\t"), "utf-8");
+		return fsPromises.writeFile(CONFIG_FILE_PATH, JSON.stringify(getCheatsObject(), null, "\t"), "utf-8");
 	}
 	const Label = sc.TextGui.extend({
 		disabledText: "",

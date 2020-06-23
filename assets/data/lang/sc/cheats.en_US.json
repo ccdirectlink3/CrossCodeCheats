@@ -1,0 +1,32 @@
+{
+  "DOCTYPE": "STATIC-LANG-FILE",
+  "feature": "sc.cheats",
+  "labels": {
+    "title": "Cheats",
+    "name": {
+      "arenaalwaysbonuses": "Arena Always Bonuses",
+      "arenaalwaysplat": "Arena Always Platinum",
+      "arenanodamagepenalty": "Arena No Damage Penalty",
+      "arenaperfectchain": "Arena Perfect Chain",
+      "cpcheat": "Do Not Remove CP",
+      "consumableinfinite": "Consumable Infinite",
+      "consumablenocooldown": "Consumable No Cooldown",
+      "creditcheat": "Credit Cheats",
+      "creditmultiplier": "Credit Multiplier",
+      "donotremovearenacoins": "Do Not Remove Arena Coins",
+      "donotremovecredit": "Do Not Remove Credit",
+      "donotremovetrophypoints": "NG+ Mods Total Cost Zero",
+      "enemydropcheat": "Enemy Drop",
+      "ignorespcheat": "Ignore SP",
+      "invincible": "Invincible",
+      "noactioncancelonhit": "No Action Cancel On Hit",
+      "noknockbackonhit": "No Knockback On Hit",
+      "overheatelim": "Overheat Elimination",
+      "plantdropcheat": "Plant Drop",
+      "tradecheat": "Do Not Remove Items On Trade",
+      "xpcheat": "XP Cheats",
+      "xpmingain": "XP Min Gain",
+      "xpmultiplier": "XP Multiplier"
+    }
+  }
+}

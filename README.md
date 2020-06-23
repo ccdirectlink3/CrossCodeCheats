@@ -7,8 +7,6 @@ This mod requires [CCLoader](https://github.com/CCDirectLink/CCLoader) which you
 
 Once you have CCLoader installed, you can install this mod by simply putting the downloaded CrossCodeCheats folder into `CrossCode/assets/mods`.
 
-If you want to install the cheats into the game directly without using CCLoader then you can simply copy and paste the contents of cheats.js and append it to the end of your `CrossCode/assets/js/game.compiled.js` file.
-
 # Images
 
 ![pause menu with Cheats button](https://i.imgur.com/aN9rl3J.png "Cheats button")
